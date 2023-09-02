@@ -1,50 +1,43 @@
 use std::fs;
 use std::path::Path;
 
-use roxmltree::Node;
+use roxmltree::{Node, Children};
 
-pub trait Instruction { 
-    fn execute(&self);
+#[derive(Debug)]
+pub enum Instruction<'a, 'b> {
+    Input(Children<'a, 'b>),
+    Step(Children<'a, 'b>),
 }
 
-#[derive(Clone, Debug)]
-pub struct StepInstruction {}
-
-#[derive(Clone, Debug)]
-pub struct InputInstruction {}
-
-impl Instruction for StepInstruction {
-    fn execute(&self) {
-        println!("Step");
+impl Instruction<'_, '_> {
+    pub fn execute(&self) {
+        match self {
+            Instruction::Input(_) => println!("{:?}", self),
+            Instruction::Step(_) => println!("{:?}", self),
+        }
     }
 }
 
-impl Instruction for InputInstruction {
-    fn execute(&self) {
-        println!("Input");
-    }
-}
-
-fn _parse_body(body: Node<'_, '_>) -> Vec<Box<dyn Instruction>> {
-    let mut instructions: Vec<Box<dyn Instruction>> = Vec::new();
+fn _parse_body<'a, 'b>(body: Node<'a, 'b>) -> Vec<Instruction<'a, 'b>> {
+    let mut instructions: Vec<Instruction> = Vec::new();
     for descendant in body.children() {
         if descendant.is_text() { continue };
         match descendant.tag_name().name() {
-            "input" => instructions.push(Box::new(InputInstruction{})),
-            "step" => instructions.push(Box::new(StepInstruction{})),
+            "input" => instructions.push(Instruction::Input(descendant.children())),
+            "step" => instructions.push(Instruction::Step(descendant.children())),
             _ => panic!("unkown xml tag"),
         }
     }
     instructions
 }
 
-pub fn parse(path: &Path) -> Vec<Box<dyn Instruction>> {
+pub fn parse(path: &Path) {
     let text = fs::read_to_string(path).unwrap();
     let doc = roxmltree::Document::parse(text.as_str()).unwrap();
 
     let root_element = doc.root_element();
 
-    let mut instructions: Vec<Box<dyn Instruction>> = Vec::new();
+    let mut instructions: Vec<Instruction> = Vec::new();
 
     for descendant in root_element.children() {
         if descendant.is_text() { continue; }
@@ -56,5 +49,8 @@ pub fn parse(path: &Path) -> Vec<Box<dyn Instruction>> {
         };
         instructions.extend(instructions_subset);
     }
-    instructions
+    
+    for ins in instructions {
+        ins.execute();
+    }
 }

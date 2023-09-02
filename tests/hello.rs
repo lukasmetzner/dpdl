@@ -4,9 +4,6 @@ use dpdl::parse;
 
 #[test]
 fn it_works() {
-    parse(PathBuf::from("./tests/proc.xml")
-        .as_path())
-        .iter()
-        .for_each(|f| f.execute());
+    parse(PathBuf::from("./tests/proc.xml").as_path());
     assert_eq!(4, 4);
 }
