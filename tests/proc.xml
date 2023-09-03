@@ -1,13 +1,8 @@
 <pipeline>
-  <!-- <head>
-    <cpu>1</cpu>
-  </head> -->
-  <body>
-    <input>
-      <file>./hello.txt</file>
-    </input>
-    <step>
-      <print/>
-    </step>
-  </body>
+  <input>
+    <file>./hello.txt</file>
+  </input>
+  <step>
+    <print/>
+  </step>
 </pipeline>

@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
-use dpdl::parse;
+use dpdl::execute;
 
 #[test]
 fn it_works() {
-    parse(PathBuf::from("./tests/proc.xml").as_path());
+    execute(PathBuf::from("./tests/proc.xml").as_path());
     assert_eq!(4, 4);
 }
