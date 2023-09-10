@@ -1,49 +1,34 @@
 use std::fs;
 use std::path::Path;
 
-use roxmltree::Node;
+pub mod instructions;
+pub mod utils;
 
-#[derive(Debug)]
-pub enum Instruction<'a, 'b> {
-    Input(Node<'a, 'b>),
-    Step(Node<'a, 'b>),
-    File(Node<'a, 'b>),
-    Print(Node<'a, 'b>),
+use instructions::{InputInstruction, StepInstruction, FileInstruction, PrintInstruction};
+use utils::parse_children;
+
+#[derive(Debug, Clone)]
+pub enum Instruction {
+    Input(InputInstruction),
+    Step(StepInstruction),
+    File(FileInstruction),
+    Print(PrintInstruction),
 }
 
-impl Instruction<'_, '_> {
+impl Instruction {
     pub fn execute(&self) {
         match self {
-            Instruction::Input(node) => self._input_ins(node),
-            Instruction::Step(node) => self._step_ins(node),
-            Instruction::File(node) => self._file_ins(node),
-            Instruction::Print(node) => self._print_ins(node),
+            Instruction::Input(instruction) => self._input_ins(instruction),
+            Instruction::Step(instruction) => self._step_ins(instruction),
+            Instruction::File(instruction) => self._file_ins(instruction),
+            Instruction::Print(instruction) => self._print_ins(instruction),
         }
     }
 
-    fn _input_ins(&self, node: &Node<'_, '_>) { println!("{:?}", node); }
-    fn _step_ins(&self, node: &Node<'_, '_>) { println!("{:?}", node); }
-    fn _file_ins(&self, node: &Node<'_, '_>) { println!("{:?}", node); }
-    fn _print_ins(&self, node: &Node<'_, '_>) { println!("{:?}", node); }
-}
-
-pub fn parse_descendants<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction<'a, 'b>> {
-    let mut instructions: Vec<Instruction<'a, 'b>> = Vec::new();
-    for child in node.children() {
-        if child.is_text() {
-            continue;
-        }
-        match child.tag_name().name() {
-            "input" => instructions.push(Instruction::Input(child)),
-            "step" => instructions.push(Instruction::Step(child)),
-            "file" => instructions.push(Instruction::File(child)),
-            "print" => instructions.push(Instruction::Print(child)),
-            _ => panic!("unknown xml tag"),
-        }
-        let sub_instructions = parse_descendants(&child);
-        instructions.extend(sub_instructions);
-    }
-    instructions
+    fn _input_ins(&self, instruction: &InputInstruction) { instruction.child_instructions.iter().for_each(|f| f.execute()); }
+    fn _step_ins(&self, instruction: &StepInstruction) { instruction.child_instructions.iter().for_each(|f| f.execute()); }
+    fn _file_ins(&self, instruction: &FileInstruction) { println!("{:?}", instruction.value); }
+    fn _print_ins(&self, instruction: &PrintInstruction) { println!("{:?}", instruction.value); }
 }
 
 pub fn execute(path: &Path) {
@@ -52,6 +37,6 @@ pub fn execute(path: &Path) {
 
     let root_element = doc.root_element();
 
-    let instructions: Vec<Instruction> = parse_descendants(&root_element);
+    let instructions: Vec<Instruction> = parse_children(&root_element);
     instructions.into_iter().for_each(|f| f.execute());
 }
