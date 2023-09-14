@@ -1,4 +1,6 @@
-use roxmltree::{Node};
+use std::{any::Any, fs};
+
+use roxmltree::Node;
 
 use crate::{Instruction, parse_children};
 
@@ -6,39 +8,68 @@ use crate::{Instruction, parse_children};
 pub struct InputInstruction { 
     pub child_instructions: Vec<Instruction>,
 }
-#[derive(Debug, Clone)]
-pub struct StepInstruction { 
-    pub child_instructions: Vec<Instruction>,
- }
-#[derive(Debug, Clone)]
-pub struct FileInstruction { 
-    pub value: String,
- }
-#[derive(Debug, Clone)]
-pub struct PrintInstruction { 
-    pub value: String,
- }
 
 impl InputInstruction {
     pub fn new(child: Node<'_, '_>) -> InputInstruction {
         InputInstruction { child_instructions: parse_children(&child), }
     }
+
+    pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
+        let mut loop_value: Box<dyn Any> = value;
+        for ele in self.child_instructions.iter() {
+            loop_value = ele.execute(loop_value);
+        }
+        loop_value
+    }
 }
+
+#[derive(Debug, Clone)]
+pub struct StepInstruction { 
+    pub child_instructions: Vec<Instruction>,
+ }
 
 impl StepInstruction {
     pub fn new(child: Node<'_, '_>) -> StepInstruction {
         StepInstruction { child_instructions: parse_children(&child), }
     }
+
+    pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
+        let mut loop_value: Box<dyn Any> = value;
+        for ele in self.child_instructions.iter() {
+            loop_value = ele.execute(loop_value);
+        }
+        loop_value
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FileInstruction { 
+    pub value: String,
 }
 
 impl FileInstruction {
     pub fn new(value: String) -> FileInstruction {
         FileInstruction { value }
     }
+
+    pub fn execute(&self) -> String {
+        fs::read_to_string(self.value.clone()).unwrap()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PrintInstruction { 
+    pub value: String,
 }
 
 impl PrintInstruction {
     pub fn new(value: String) -> PrintInstruction {
         PrintInstruction { value }
+    }
+
+    pub fn execute(&self, value: Box<dyn Any>) -> String {
+        let string_value = value.downcast_ref::<String>().unwrap().clone();
+        println!("{:?}", string_value);
+        string_value
     }
 }

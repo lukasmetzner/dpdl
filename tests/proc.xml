@@ -1,6 +1,6 @@
 <pipeline>
   <input>
-    <file>./hello.txt</file>
+    <file>./tests/test_file.txt</file>
   </input>
   <step>
     <print/>
