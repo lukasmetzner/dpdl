@@ -1,6 +1,8 @@
 use std::any::Any;
 
-use crate::instructions::{RootInstruction, InputInstruction, StepInstruction, FileInstruction, PrintInstruction};
+use crate::instructions::{
+    FileInstruction, InputInstruction, PrintInstruction, RootInstruction, StepInstruction,
+};
 
 #[derive(Debug, Clone)]
 pub enum Instruction {

@@ -16,7 +16,6 @@ fn check_output() {
 #[test]
 fn check_instruction_tree() {
     //TODO
-    let root_instruction = parse_file(PathBuf::from("./tests/proc.xml").as_path())
-        .unwrap();
+    let root_instruction = parse_file(PathBuf::from("./tests/proc.xml").as_path()).unwrap();
     assert!(true);
 }

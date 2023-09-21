@@ -1,8 +1,13 @@
-use std::{path::Path, error::Error, fs};
+use std::{error::Error, fs, path::Path};
 
 use roxmltree::Node;
 
-use crate::{instruction::Instruction, instructions::{InputInstruction, StepInstruction, FileInstruction, PrintInstruction, RootInstruction}};
+use crate::{
+    instruction::Instruction,
+    instructions::{
+        FileInstruction, InputInstruction, PrintInstruction, RootInstruction, StepInstruction,
+    },
+};
 
 pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
     let mut instructions: Vec<Instruction> = Vec::new();
@@ -26,7 +31,7 @@ pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
                         None => String::new(),
                     }
                 }))))
-            },
+            }
             _ => panic!("unknown xml tag"),
         }
     }
@@ -37,5 +42,7 @@ pub fn parse_file(path: &Path) -> Result<Instruction, Box<dyn Error>> {
     let text = fs::read_to_string(path)?;
     let doc = roxmltree::Document::parse(text.as_str())?;
     let root_element = doc.root_element();
-    Ok(Instruction::Root(RootInstruction::new(root_element.children())))
+    Ok(Instruction::Root(RootInstruction::new(
+        root_element.children(),
+    )))
 }

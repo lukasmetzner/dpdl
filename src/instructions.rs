@@ -1,6 +1,6 @@
 use std::{any::Any, fs};
 
-use roxmltree::{Node, Children};
+use roxmltree::{Children, Node};
 
 use crate::{instruction::Instruction, utils::parse_children};
 
@@ -15,7 +15,9 @@ impl RootInstruction {
         for child in children {
             instructions.append(&mut parse_children(&child));
         }
-        RootInstruction { child_instructions: instructions, }
+        RootInstruction {
+            child_instructions: instructions,
+        }
     }
 
     pub fn execute(&self) -> Box<dyn Any> {
@@ -28,13 +30,15 @@ impl RootInstruction {
 }
 
 #[derive(Debug, Clone)]
-pub struct InputInstruction { 
+pub struct InputInstruction {
     pub child_instructions: Vec<Instruction>,
 }
 
 impl InputInstruction {
     pub fn new(child: Node<'_, '_>) -> InputInstruction {
-        InputInstruction { child_instructions: parse_children(&child), }
+        InputInstruction {
+            child_instructions: parse_children(&child),
+        }
     }
 
     pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
@@ -47,13 +51,15 @@ impl InputInstruction {
 }
 
 #[derive(Debug, Clone)]
-pub struct StepInstruction { 
+pub struct StepInstruction {
     pub child_instructions: Vec<Instruction>,
- }
+}
 
 impl StepInstruction {
     pub fn new(child: Node<'_, '_>) -> StepInstruction {
-        StepInstruction { child_instructions: parse_children(&child), }
+        StepInstruction {
+            child_instructions: parse_children(&child),
+        }
     }
 
     pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
@@ -66,7 +72,7 @@ impl StepInstruction {
 }
 
 #[derive(Debug, Clone)]
-pub struct FileInstruction { 
+pub struct FileInstruction {
     pub value: String,
 }
 
@@ -81,7 +87,7 @@ impl FileInstruction {
 }
 
 #[derive(Debug, Clone)]
-pub struct PrintInstruction { 
+pub struct PrintInstruction {
     pub value: String,
 }
 
