@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
-use dpdl::parse_file;
+use dpdl::utils::parse_file;
 
 #[test]
-fn it_works() {
+fn check_output() {
     let value = parse_file(PathBuf::from("./tests/proc.xml").as_path())
         .unwrap()
         .execute(Box::new(()))
@@ -11,4 +11,12 @@ fn it_works() {
         .unwrap()
         .clone();
     assert_eq!(value, String::from("test_file"));
+}
+
+#[test]
+fn check_instruction_tree() {
+    //TODO
+    let root_instruction = parse_file(PathBuf::from("./tests/proc.xml").as_path())
+        .unwrap();
+    assert!(true);
 }

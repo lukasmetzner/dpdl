@@ -1,8 +1,8 @@
 use std::{any::Any, fs};
 
-use roxmltree::Node;
+use roxmltree::{Node, Children};
 
-use crate::{Instruction, parse_children};
+use crate::{instruction::Instruction, utils::parse_children};
 
 #[derive(Debug, Clone)]
 pub struct RootInstruction {
@@ -10,8 +10,12 @@ pub struct RootInstruction {
 }
 
 impl RootInstruction {
-    pub fn new(child: Node<'_, '_>) -> RootInstruction {
-        RootInstruction { child_instructions: parse_children(&child), }
+    pub fn new(children: Children<'_, '_>) -> RootInstruction {
+        let mut instructions: Vec<Instruction> = Vec::new();
+        for child in children {
+            instructions.append(&mut parse_children(&child));
+        }
+        RootInstruction { child_instructions: instructions, }
     }
 
     pub fn execute(&self) -> Box<dyn Any> {
