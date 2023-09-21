@@ -5,6 +5,25 @@ use roxmltree::Node;
 use crate::{Instruction, parse_children};
 
 #[derive(Debug, Clone)]
+pub struct RootInstruction {
+    pub child_instructions: Vec<Instruction>,
+}
+
+impl RootInstruction {
+    pub fn new(child: Node<'_, '_>) -> RootInstruction {
+        RootInstruction { child_instructions: parse_children(&child), }
+    }
+
+    pub fn execute(&self) -> Box<dyn Any> {
+        let mut loop_value: Box<dyn Any> = Box::new(());
+        for ele in self.child_instructions.iter() {
+            loop_value = ele.execute(loop_value);
+        }
+        loop_value
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct InputInstruction { 
     pub child_instructions: Vec<Instruction>,
 }

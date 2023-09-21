@@ -1,6 +1,9 @@
 use roxmltree::Node;
 
-use crate::{Instruction, instructions::{StepInstruction, FileInstruction, PrintInstruction, InputInstruction}};
+use crate::{
+    instructions::{FileInstruction, InputInstruction, PrintInstruction, StepInstruction, RootInstruction},
+    Instruction,
+};
 
 pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
     let mut instructions: Vec<Instruction> = Vec::new();
@@ -17,12 +20,17 @@ pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
                     None => String::new(),
                 }
             })))),
-            "print" => instructions.push(Instruction::Print(PrintInstruction::new(String::from({
-                match child.text() {
-                    Some(val) => String::from(val),
-                    None => String::new(),
-                }
-            })))),
+            "print" => {
+                instructions.push(Instruction::Print(PrintInstruction::new(String::from({
+                    match child.text() {
+                        Some(val) => String::from(val),
+                        None => String::new(),
+                    }
+                }))))
+            },
+            "pipeline" => {
+                instructions.push(Instruction::Root(RootInstruction::new(child.clone())))
+            },
             _ => panic!("unknown xml tag"),
         }
     }

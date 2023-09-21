@@ -1,10 +1,12 @@
 use std::path::PathBuf;
 
-use dpdl::execute;
+use dpdl::parse_file;
 
 #[test]
 fn it_works() {
-    let value = execute(PathBuf::from("./tests/proc.xml").as_path())
+    let value = parse_file(PathBuf::from("./tests/proc.xml").as_path())
+        .unwrap()
+        .execute(Box::new(()))
         .downcast_ref::<String>()
         .unwrap()
         .clone();
