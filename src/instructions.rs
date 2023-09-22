@@ -1,4 +1,7 @@
-use std::{any::Any, fs};
+use std::{
+    any::{type_name, Any},
+    fs,
+};
 
 use roxmltree::{Children, Node};
 
@@ -8,6 +11,9 @@ use base64::{engine::general_purpose, Engine as _};
 
 pub trait Instruction {
     fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any>;
+    fn print_instruction(&self) {
+        println!("{:?}", type_name::<Self>());
+    }
 }
 
 pub struct RootInstruction {
@@ -15,16 +21,9 @@ pub struct RootInstruction {
 }
 
 impl RootInstruction {
-    pub fn new(children: Children<'_, '_>) -> RootInstruction {
-        let mut instructions: Vec<Box<dyn Instruction>> = Vec::new();
-        for child in children {
-            if child.is_text() {
-                continue;
-            }
-            instructions.append(&mut parse_children(&child));
-        }
+    pub fn new(node: Node<'_, '_>) -> RootInstruction {
         RootInstruction {
-            child_instructions: instructions,
+            child_instructions: parse_children(&node),
         }
     }
 }
@@ -36,6 +35,13 @@ impl Instruction for RootInstruction {
             loop_value = ele.execute(loop_value);
         }
         loop_value
+    }
+
+    fn print_instruction(&self) {
+        println!("{:?}", type_name::<Self>());
+        for child in self.child_instructions.iter() {
+            child.print_instruction();
+        }
     }
 }
 
@@ -59,6 +65,13 @@ impl Instruction for InputInstruction {
         }
         loop_value
     }
+
+    fn print_instruction(&self) {
+        println!("{:?}", type_name::<Self>());
+        for child in self.child_instructions.iter() {
+            child.print_instruction();
+        }
+    }
 }
 
 pub struct StepInstruction {
@@ -80,6 +93,13 @@ impl Instruction for StepInstruction {
             loop_value = ele.execute(loop_value);
         }
         loop_value
+    }
+
+    fn print_instruction(&self) {
+        println!("{:?}", type_name::<Self>());
+        for child in self.child_instructions.iter() {
+            child.print_instruction();
+        }
     }
 }
 
