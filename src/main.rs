@@ -1,6 +1,4 @@
 use std::path::PathBuf;
-
-mod instruction;
 mod instructions;
 pub mod parsing;
 

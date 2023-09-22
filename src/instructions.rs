@@ -2,18 +2,21 @@ use std::{any::Any, fs};
 
 use roxmltree::{Children, Node};
 
-use crate::{instruction::Instruction, parsing::parse_children};
+use crate::parsing::parse_children;
 
 use base64::{engine::general_purpose, Engine as _};
 
-#[derive(Debug, Clone)]
+pub trait Instruction {
+    fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any>;
+}
+
 pub struct RootInstruction {
-    pub child_instructions: Vec<Instruction>,
+    pub child_instructions: Vec<Box<dyn Instruction>>,
 }
 
 impl RootInstruction {
     pub fn new(children: Children<'_, '_>) -> RootInstruction {
-        let mut instructions: Vec<Instruction> = Vec::new();
+        let mut instructions: Vec<Box<dyn Instruction>> = Vec::new();
         for child in children {
             if child.is_text() {
                 continue;
@@ -24,8 +27,10 @@ impl RootInstruction {
             child_instructions: instructions,
         }
     }
+}
 
-    pub fn execute(&self) -> Box<dyn Any> {
+impl Instruction for RootInstruction {
+    fn execute(&self, _value: Box<dyn Any>) -> Box<dyn Any> {
         let mut loop_value: Box<dyn Any> = Box::new(());
         for ele in self.child_instructions.iter() {
             loop_value = ele.execute(loop_value);
@@ -34,9 +39,8 @@ impl RootInstruction {
     }
 }
 
-#[derive(Debug, Clone)]
 pub struct InputInstruction {
-    pub child_instructions: Vec<Instruction>,
+    pub child_instructions: Vec<Box<dyn Instruction>>,
 }
 
 impl InputInstruction {
@@ -45,8 +49,10 @@ impl InputInstruction {
             child_instructions: parse_children(&child),
         }
     }
+}
 
-    pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
+impl Instruction for InputInstruction {
+    fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
         let mut loop_value: Box<dyn Any> = value;
         for ele in self.child_instructions.iter() {
             loop_value = ele.execute(loop_value);
@@ -55,9 +61,8 @@ impl InputInstruction {
     }
 }
 
-#[derive(Debug, Clone)]
 pub struct StepInstruction {
-    pub child_instructions: Vec<Instruction>,
+    pub child_instructions: Vec<Box<dyn Instruction>>,
 }
 
 impl StepInstruction {
@@ -66,8 +71,10 @@ impl StepInstruction {
             child_instructions: parse_children(&child),
         }
     }
+}
 
-    pub fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
+impl Instruction for StepInstruction {
+    fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
         let mut loop_value: Box<dyn Any> = value;
         for ele in self.child_instructions.iter() {
             loop_value = ele.execute(loop_value);
@@ -85,8 +92,10 @@ impl FileInstruction {
     pub fn new(value: String) -> FileInstruction {
         FileInstruction { value }
     }
+}
 
-    pub fn execute(&self) -> Box<String> {
+impl Instruction for FileInstruction {
+    fn execute(&self, _value: Box<dyn Any>) -> Box<dyn Any> {
         Box::new(fs::read_to_string(self.value.clone()).unwrap())
     }
 }
@@ -98,9 +107,11 @@ impl PrintInstruction {
     pub fn new() -> PrintInstruction {
         PrintInstruction {}
     }
+}
 
-    pub fn execute(&self, value: Box<dyn Any>) -> Box<String> {
-        let string_value = value.downcast_ref::<String>().unwrap().clone();
+impl Instruction for PrintInstruction {
+    fn execute(&self, _value: Box<dyn Any>) -> Box<dyn Any> {
+        let string_value = _value.downcast_ref::<String>().unwrap().clone();
         println!("{:?}", string_value);
         Box::new(string_value)
     }
@@ -113,9 +124,11 @@ impl Base64Instruction {
     pub fn new() -> Base64Instruction {
         Base64Instruction {}
     }
+}
 
-    pub fn execute(&self, value: Box<dyn Any>) -> Box<String> {
-        let string_value = value.downcast_ref::<String>().unwrap();
+impl Instruction for Base64Instruction {
+    fn execute(&self, _value: Box<dyn Any>) -> Box<dyn Any> {
+        let string_value = _value.downcast_ref::<String>().unwrap();
         let base64_encoded_value = general_purpose::STANDARD.encode(string_value);
         Box::new(base64_encoded_value)
     }
