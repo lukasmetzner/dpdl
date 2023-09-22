@@ -3,6 +3,6 @@
     <file>./tests/test_file.txt</file>
   </input>
   <step>
-    <print/>
+    <base64/>
   </step>
 </pipeline>

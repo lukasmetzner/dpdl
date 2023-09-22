@@ -5,7 +5,8 @@ use roxmltree::Node;
 use crate::{
     instruction::Instruction,
     instructions::{
-        FileInstruction, InputInstruction, PrintInstruction, RootInstruction, StepInstruction,
+        Base64Instruction, FileInstruction, InputInstruction, PrintInstruction, RootInstruction,
+        StepInstruction,
     },
 };
 
@@ -15,6 +16,7 @@ pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
         if child.is_text() {
             continue;
         }
+
         match child.tag_name().name() {
             "input" => instructions.push(Instruction::Input(InputInstruction::new(child.clone()))),
             "step" => instructions.push(Instruction::Step(StepInstruction::new(child.clone()))),
@@ -24,14 +26,8 @@ pub fn parse_children<'a, 'b>(node: &Node<'a, 'b>) -> Vec<Instruction> {
                     None => String::new(),
                 }
             })))),
-            "print" => {
-                instructions.push(Instruction::Print(PrintInstruction::new(String::from({
-                    match child.text() {
-                        Some(val) => String::from(val),
-                        None => String::new(),
-                    }
-                }))))
-            }
+            "print" => instructions.push(Instruction::Print(PrintInstruction::new())),
+            "base64" => instructions.push(Instruction::Base64(Base64Instruction::new())),
             _ => panic!("unknown xml tag"),
         }
     }

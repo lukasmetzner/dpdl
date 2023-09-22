@@ -2,7 +2,9 @@ use std::{any::Any, fs};
 
 use roxmltree::{Children, Node};
 
-use crate::{instruction::Instruction, utils::parse_children};
+use crate::{instruction::Instruction, parsing::parse_children};
+
+use base64::{engine::general_purpose, Engine as _};
 
 #[derive(Debug, Clone)]
 pub struct RootInstruction {
@@ -13,6 +15,9 @@ impl RootInstruction {
     pub fn new(children: Children<'_, '_>) -> RootInstruction {
         let mut instructions: Vec<Instruction> = Vec::new();
         for child in children {
+            if child.is_text() {
+                continue;
+            }
             instructions.append(&mut parse_children(&child));
         }
         RootInstruction {
@@ -81,24 +86,37 @@ impl FileInstruction {
         FileInstruction { value }
     }
 
-    pub fn execute(&self) -> String {
-        fs::read_to_string(self.value.clone()).unwrap()
+    pub fn execute(&self) -> Box<String> {
+        Box::new(fs::read_to_string(self.value.clone()).unwrap())
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct PrintInstruction {
-    pub value: String,
-}
+pub struct PrintInstruction {}
 
 impl PrintInstruction {
-    pub fn new(value: String) -> PrintInstruction {
-        PrintInstruction { value }
+    pub fn new() -> PrintInstruction {
+        PrintInstruction {}
     }
 
-    pub fn execute(&self, value: Box<dyn Any>) -> String {
+    pub fn execute(&self, value: Box<dyn Any>) -> Box<String> {
         let string_value = value.downcast_ref::<String>().unwrap().clone();
         println!("{:?}", string_value);
-        string_value
+        Box::new(string_value)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Base64Instruction {}
+
+impl Base64Instruction {
+    pub fn new() -> Base64Instruction {
+        Base64Instruction {}
+    }
+
+    pub fn execute(&self, value: Box<dyn Any>) -> Box<String> {
+        let string_value = value.downcast_ref::<String>().unwrap();
+        let base64_encoded_value = general_purpose::STANDARD.encode(string_value);
+        Box::new(base64_encoded_value)
     }
 }

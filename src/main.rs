@@ -2,10 +2,10 @@ use std::path::PathBuf;
 
 mod instruction;
 mod instructions;
-pub mod utils;
+pub mod parsing;
 
 fn main() {
-    let _ = utils::parse_file(PathBuf::from("./tests/proc.xml").as_path())
+    let _ = parsing::parse_file(PathBuf::from("./main-pipeline.xml").as_path())
         .unwrap()
         .execute(Box::new(()))
         .downcast_ref::<String>()

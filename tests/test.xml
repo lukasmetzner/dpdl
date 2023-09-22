@@ -1,0 +1,8 @@
+<pipeline>
+  <input>
+    <file>./tests/test_file.txt</file>
+  </input>
+  <step>
+    <base64/>
+  </step>
+</pipeline>
