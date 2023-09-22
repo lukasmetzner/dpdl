@@ -3,7 +3,7 @@ use std::{
     fs,
 };
 
-use roxmltree::{Children, Node};
+use roxmltree::Node;
 
 use crate::parsing::parse_children;
 
@@ -21,7 +21,7 @@ pub struct RootInstruction {
 }
 
 impl RootInstruction {
-    pub fn new(node: Node<'_, '_>) -> RootInstruction {
+    pub fn new(node: Node) -> RootInstruction {
         RootInstruction {
             child_instructions: parse_children(&node),
         }
@@ -50,7 +50,7 @@ pub struct InputInstruction {
 }
 
 impl InputInstruction {
-    pub fn new(child: Node<'_, '_>) -> InputInstruction {
+    pub fn new(child: Node) -> InputInstruction {
         InputInstruction {
             child_instructions: parse_children(&child),
         }
@@ -79,7 +79,7 @@ pub struct StepInstruction {
 }
 
 impl StepInstruction {
-    pub fn new(child: Node<'_, '_>) -> StepInstruction {
+    pub fn new(child: Node) -> StepInstruction {
         StepInstruction {
             child_instructions: parse_children(&child),
         }
