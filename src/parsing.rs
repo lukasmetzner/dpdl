@@ -3,8 +3,7 @@ use std::{error::Error, fs, path::Path};
 use roxmltree::Node;
 
 use crate::instructions::{
-    Base64Instruction, FileInstruction, InputInstruction, Instruction, PrintInstruction,
-    RootInstruction, StepInstruction,
+    Base64Instruction, FileInstruction, GroupInstruction, Instruction, PrintInstruction,
 };
 
 pub fn parse_children(node: &Node) -> Vec<Box<dyn Instruction>> {
@@ -14,8 +13,8 @@ pub fn parse_children(node: &Node) -> Vec<Box<dyn Instruction>> {
             continue;
         }
         let instruction: Box<dyn Instruction> = match child.tag_name().name() {
-            "input" => Box::new(InputInstruction::new(child.clone())),
-            "step" => Box::new(StepInstruction::new(child.clone())),
+            "input" => Box::new(GroupInstruction::new(child.clone())),
+            "step" => Box::new(GroupInstruction::new(child.clone())),
             "file" => {
                 let text_val = child.text().unwrap_or_default().to_string();
                 Box::new(FileInstruction::new(text_val))
@@ -33,5 +32,5 @@ pub fn parse_file(path: &Path) -> Result<Box<dyn Instruction>, Box<dyn Error>> {
     let text = fs::read_to_string(path)?;
     let doc = roxmltree::Document::parse(text.as_str())?;
     let root_element = doc.root_element();
-    Ok(Box::new(RootInstruction::new(root_element)))
+    Ok(Box::new(GroupInstruction::new(root_element)))
 }

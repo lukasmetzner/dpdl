@@ -16,79 +16,21 @@ pub trait Instruction {
     }
 }
 
-pub struct RootInstruction {
+pub struct GroupInstruction {
     pub child_instructions: Vec<Box<dyn Instruction>>,
 }
 
-impl RootInstruction {
-    pub fn new(node: Node) -> RootInstruction {
-        RootInstruction {
+impl GroupInstruction {
+    pub fn new(node: Node) -> GroupInstruction {
+        GroupInstruction {
             child_instructions: parse_children(&node),
         }
     }
 }
 
-impl Instruction for RootInstruction {
+impl Instruction for GroupInstruction {
     fn execute(&self, _value: Box<dyn Any>) -> Box<dyn Any> {
-        let mut loop_value: Box<dyn Any> = Box::new(());
-        for ele in self.child_instructions.iter() {
-            loop_value = ele.execute(loop_value);
-        }
-        loop_value
-    }
-
-    fn print_instruction(&self) {
-        println!("{:?}", type_name::<Self>());
-        for child in self.child_instructions.iter() {
-            child.print_instruction();
-        }
-    }
-}
-
-pub struct InputInstruction {
-    pub child_instructions: Vec<Box<dyn Instruction>>,
-}
-
-impl InputInstruction {
-    pub fn new(child: Node) -> InputInstruction {
-        InputInstruction {
-            child_instructions: parse_children(&child),
-        }
-    }
-}
-
-impl Instruction for InputInstruction {
-    fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
-        let mut loop_value: Box<dyn Any> = value;
-        for ele in self.child_instructions.iter() {
-            loop_value = ele.execute(loop_value);
-        }
-        loop_value
-    }
-
-    fn print_instruction(&self) {
-        println!("{:?}", type_name::<Self>());
-        for child in self.child_instructions.iter() {
-            child.print_instruction();
-        }
-    }
-}
-
-pub struct StepInstruction {
-    pub child_instructions: Vec<Box<dyn Instruction>>,
-}
-
-impl StepInstruction {
-    pub fn new(child: Node) -> StepInstruction {
-        StepInstruction {
-            child_instructions: parse_children(&child),
-        }
-    }
-}
-
-impl Instruction for StepInstruction {
-    fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any> {
-        let mut loop_value: Box<dyn Any> = value;
+        let mut loop_value: Box<dyn Any> = _value;
         for ele in self.child_instructions.iter() {
             loop_value = ele.execute(loop_value);
         }
