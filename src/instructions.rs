@@ -1,6 +1,5 @@
 use std::{
     any::{type_name, Any},
-    fmt::Display,
     fs,
 };
 
