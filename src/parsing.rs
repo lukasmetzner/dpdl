@@ -9,7 +9,7 @@ use crate::instructions::{
 pub fn parse_children(node: &Node) -> Vec<Box<dyn Instruction>> {
     let mut instructions: Vec<Box<dyn Instruction>> = Vec::new();
     for child in node.children() {
-        if child.is_text() {
+        if !child.is_element() {
             continue;
         }
         let instruction: Box<dyn Instruction> = match child.tag_name().name() {

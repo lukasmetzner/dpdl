@@ -1,9 +1,11 @@
 use std::{
     any::{type_name, Any},
+    fmt::Display,
     fs,
 };
 
 use roxmltree::Node;
+use termtree::Tree;
 
 use crate::parsing::parse_children;
 
@@ -11,8 +13,15 @@ use base64::{engine::general_purpose, Engine as _};
 
 pub trait Instruction {
     fn execute(&self, value: Box<dyn Any>) -> Box<dyn Any>;
-    fn print_instruction(&self) {
+    fn print_instructions(&self) {
         println!("{:?}", type_name::<Self>());
+    }
+    fn get_instruction_name(&self) -> &'static str {
+        let raw_type_name = type_name::<Self>();
+        raw_type_name.split("::").last().unwrap_or(raw_type_name)
+    }
+    fn get_instruction_name_tree(&self) -> Tree<&str> {
+        Tree::new(self.get_instruction_name())
     }
 }
 
@@ -37,11 +46,21 @@ impl Instruction for GroupInstruction {
         loop_value
     }
 
-    fn print_instruction(&self) {
+    fn print_instructions(&self) {
         println!("{:?}", type_name::<Self>());
         for child in self.child_instructions.iter() {
-            child.print_instruction();
+            child.print_instructions();
         }
+    }
+
+    fn get_instruction_name_tree(&self) -> Tree<&str> {
+        self.child_instructions.iter().fold(
+            Tree::new(self.get_instruction_name()),
+            |mut acc_tree, child| {
+                acc_tree.push(child.get_instruction_name_tree());
+                acc_tree
+            },
+        )
     }
 }
 

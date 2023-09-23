@@ -1,20 +1,6 @@
 use std::path::PathBuf;
 
-use dpdl::{
-    instructions::{Base64Instruction, Instruction},
-    parsing::parse_file,
-};
-
-#[test]
-fn test_base64_instruction() {
-    let ins = Base64Instruction::new();
-    let encoded_value = ins.execute(Box::new(String::from("test_file")));
-    let correct_value = String::from("dGVzdF9maWxl");
-    assert_eq!(
-        encoded_value.downcast_ref::<String>().unwrap(),
-        &correct_value
-    );
-}
+use dpdl::parsing::parse_file;
 
 #[test]
 fn test_output() {

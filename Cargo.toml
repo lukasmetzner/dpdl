@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 base64 = "0.21.4"
 roxmltree = { version = "0.18.0", features = [ "positions" ] }
+termtree = "0.4.1"
